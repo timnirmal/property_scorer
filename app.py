@@ -6,6 +6,22 @@ import os
 import json
 from datetime import datetime
 
+# Setup score folder structure if needed
+if not os.path.exists('score'):
+    os.makedirs('score')
+    
+# Copy scorer.py to score folder if not already there
+if not os.path.exists('score/scorer.py'):
+    with open('scorer.py', 'r') as f:
+        scorer_code = f.read()
+    with open('score/scorer.py', 'w') as f:
+        f.write(scorer_code)
+        
+# Create __init__.py if not already there
+if not os.path.exists('score/__init__.py'):
+    with open('score/__init__.py', 'w') as f:
+        f.write('from .scorer import PropertyScorer\n\n__all__ = [\'PropertyScorer\']')
+
 # Import PropertyScorer
 from score.scorer import PropertyScorer
 
@@ -163,22 +179,26 @@ with tab2:
     def create_property_data(property_name):
         st.subheader(f"{property_name}")
         
+        # Default values based on property name
+        default_values = {
+            "walk_dist": [1.0, 1.2, 1.4],
+            "walk_time": [13.0, 16.0, 20.0],
+            "drive_dist": [2.0, 3.0, 4.0],
+            "drive_time": [10.0, 15.0, 25.0]
+        }
+        
+        default_qualities = {
+            "walk_dist": [2, 1, 5],
+            "walk_time": [4, 3, 2],
+            "drive_dist": [3, 4, 2],
+            "drive_time": [5, 3, 1]
+        }
+        
         # Create a DataFrame for cleaner UI
         data = {
             "Property": ["A", "B", "C"],
-            "Value": [
-                1.0 if "dist" in property_name else 13.0,
-                1.2 if "dist" in property_name else 16.0,
-                1.4 if "dist" in property_name else 20.0
-            ],
-            "Quality (1-5)": [
-                2 if property_name == "walk_dist" and "A" == "A" else 
-                1 if property_name == "walk_dist" and "A" == "B" else
-                5 if property_name == "walk_dist" and "A" == "C" else
-                4 if property_name == "walk_time" and "A" == "A" else
-                3 if property_name == "walk_time" and "A" == "B" else
-                2 if property_name == "walk_time" and "A" == "C" else 3
-            ]
+            "Value": default_values.get(property_name, [1.0, 1.5, 2.0]),
+            "Quality (1-5)": default_qualities.get(property_name, [3, 3, 3])
         }
         
         df = pd.DataFrame(data)
@@ -308,47 +328,97 @@ with tab3:
                 st.text(verbose)
 
 with tab4:
-    # Display history
+    # Display history in a more compact format
     st.header("Test History")
     
     if not st.session_state.history:
         st.info("No tests have been run yet. Configure parameters and run a calculation to see results here.")
-    
-    for i, entry in enumerate(reversed(st.session_state.history)):
-        active_props = [prop for prop, is_active in entry["active_props"].items() if is_active]
-        with st.expander(f"Test #{len(st.session_state.history) - i} - {entry['timestamp']} ({', '.join(active_props)})"):
-            col1, col2 = st.columns(2)
+    else:
+        # Create a table for quick comparison of test results
+        summary_data = []
+        for i, entry in enumerate(reversed(st.session_state.history)):
+            test_num = len(st.session_state.history) - i
+            active_props = [prop for prop, is_active in entry["active_props"].items() if is_active]
             
-            with col1:
-                st.subheader("Profile")
-                for prop, cfg in entry["profile"].items():
-                    st.write(f"**{prop}**:")
-                    for param, val in cfg.items():
-                        st.write(f"- {param}: {val}")
+            # Get scores for each property
+            scores = {f"Score {name}": f"{score:.3f}" for name, score in entry["results"].items()}
+            
+            # Create summary row
+            summary_row = {
+                "Test #": test_num,
+                "Time": entry["timestamp"].split()[1],  # Just show time for compactness
+                "Properties": ", ".join(active_props),
+                **scores
+            }
+            summary_data.append(summary_row)
+        
+        # Display summary table
+        if summary_data:
+            st.subheader("Results Summary")
+            summary_df = pd.DataFrame(summary_data)
+            st.dataframe(summary_df, hide_index=True, use_container_width=True)
+        
+        # Detailed history with expanders
+        st.subheader("Detailed Test History")
+        for i, entry in enumerate(reversed(st.session_state.history)):
+            active_props = [prop for prop, is_active in entry["active_props"].items() if is_active]
+            test_num = len(st.session_state.history) - i
+            
+            # Create a compact summary of results
+            results_summary = " | ".join([f"{name}: {score:.3f}" for name, score in entry["results"].items()])
+            
+            with st.expander(f"Test #{test_num} - {entry['timestamp']} - {results_summary}"):
+                tab1, tab2, tab3 = st.tabs(["Configuration", "Data", "Results"])
                 
-                st.subheader("Parameters")
-                for param, val in entry["params"].items():
-                    st.write(f"- {param}: {val}")
-            
-            with col2:
-                st.subheader("Properties")
-                for name, props in entry["properties"].items():
-                    st.write(f"**Property {name}**:")
-                    for prop, val in props.items():
-                        st.write(f"- {prop}: {val}")
+                with tab1:
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.caption("Active Properties")
+                        st.write(", ".join(active_props))
+                        
+                        st.caption("PropertyScorer Parameters")
+                        params_text = ", ".join([f"{param}: {val}" for param, val in entry["params"].items()])
+                        st.write(params_text)
+                    
+                    with col2:
+                        st.caption("Profile Configuration")
+                        for prop, cfg in entry["profile"].items():
+                            st.write(f"**{prop}**: {cfg['mode']}, target={cfg['target']}, weight={cfg['weight']}")
                 
-                st.subheader("Qualities")
-                for name, quals in entry["qualities"].items():
-                    st.write(f"**Property {name}**:")
-                    for prop, val in quals.items():
-                        st.write(f"- {prop}: {val}")
-            
-            st.subheader("Results")
-            results_data = [{"Property": name, "Score": f"{score:.3f}"} for name, score in entry["results"].items()]
-            results_df = pd.DataFrame(results_data)
-            st.dataframe(results_df, hide_index=True)
-            
-            st.subheader("Verbose Output")
-            for name, verbose in entry["verbose_outputs"].items():
-                with st.expander(f"Property {name} verbose output"):
-                    st.text(verbose)
+                with tab2:
+                    # Create data tables
+                    property_data = []
+                    for property_name in ["A", "B", "C"]:
+                        if property_name in entry["properties"]:
+                            row = {"Property": property_name}
+                            
+                            # Add raw values
+                            for prop in active_props:
+                                if prop in entry["properties"][property_name]:
+                                    row[f"{prop} (raw)"] = entry["properties"][property_name][prop]
+                            
+                            # Add quality values
+                            for prop in active_props:
+                                if prop in entry["qualities"][property_name]:
+                                    row[f"{prop} (qual)"] = entry["qualities"][property_name][prop]
+                            
+                            property_data.append(row)
+                    
+                    if property_data:
+                        st.caption("Property Data and Quality Ratings")
+                        df = pd.DataFrame(property_data)
+                        st.dataframe(df, hide_index=True, use_container_width=True)
+                
+                with tab3:
+                    # Results
+                    st.caption("Final Scores")
+                    results_data = [{"Property": name, "Score": f"{score:.3f}"} for name, score in entry["results"].items()]
+                    results_df = pd.DataFrame(results_data)
+                    st.dataframe(results_df, hide_index=True)
+                    
+                    # Verbose output
+                    st.caption("Calculation Details")
+                    for name, verbose in entry["verbose_outputs"].items():
+                        st.write(f"**Property {name} verbose output:**")
+                        st.code(verbose, language="text")
