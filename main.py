@@ -14,13 +14,13 @@ profile = {
 properties = {
     "A": {"walk_dist":1.0, "walk_time":13.0},
     "B": {"walk_dist":1.2, "walk_time":16.0},
-    "C": {"walk_dist":1.4, "walk_time":20.0},
+    "C": {"walk_dist":1.6, "walk_time":20.0},
 }
 
 # 3) Quality ratings
 qualities = {
-    "A": {"walk_dist":2, "walk_time":4},
-    "B": {"walk_dist":1, "walk_time":3},
+    "A": {"walk_dist":5, "walk_time":4},
+    "B": {"walk_dist":5, "walk_time":3},
     "C": {"walk_dist":5, "walk_time":2},
 }
 
