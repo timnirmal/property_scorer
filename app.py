@@ -6,6 +6,9 @@ import os
 import json
 from datetime import datetime
 
+# Set light theme as default
+st.set_page_config(page_title="PropertyScorer Experiment UI", page_icon="📊", layout="wide", initial_sidebar_state="expanded", menu_items=None)
+
 # Setup score folder structure if needed
 if not os.path.exists('score'):
     os.makedirs('score')
@@ -37,7 +40,7 @@ st.sidebar.header("Property Selection")
 st.sidebar.write("Toggle which properties to include in the experiment:")
 
 use_walk_dist = st.sidebar.checkbox("Walking Distance", value=True)
-use_walk_time = st.sidebar.checkbox("Walking Time", value=True)
+use_walk_time = st.sidebar.checkbox("Walking Time", value=False)
 use_drive_dist = st.sidebar.checkbox("Driving Distance", value=False)
 use_drive_time = st.sidebar.checkbox("Driving Time", value=False)
 
