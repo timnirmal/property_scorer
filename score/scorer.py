@@ -8,9 +8,10 @@ class PropertyScorer:
     def __init__(self,
                  profile: Dict[str, Dict[str, float]],
                  max_quality: int = 5,
+                 quality_floor: float = 0.1,
+                 quality_weight: float = 0.8,
                  must_have_tolerance: float = 0.0,
-                 margin_epsilon: float = 1e-6,
-                 quality_floor: float = 0.0):
+                 margin_epsilon: float = 1e-6):
         """
         profile: {
           factor: {
@@ -32,6 +33,7 @@ class PropertyScorer:
         self.tol = must_have_tolerance
         self.eps = margin_epsilon
         self.q_floor = quality_floor
+        self.q_weight = quality_weight
 
         self._validate_and_autonudge()
 
@@ -132,49 +134,51 @@ class PropertyScorer:
             w = cfg["weight"]
 
             if x is None or q is None:
-                if verbose:
-                    print(f"{factor}: missing data → skip")
+                if verbose: print(f"{factor}: missing data → skip")
                 continue
             if x < 0:
-                if verbose:
-                    print(f"{factor}: raw < 0 ({x}) → skip")
+                if verbose: print(f"{factor}: raw < 0 ({x}) → skip")
                 continue
 
             r = self._raw_score(x, cfg)
             if r is None:
-                if verbose:
-                    print(f"{factor}: irrelevant → skip")
+                if verbose: print(f"{factor}: irrelevant → skip")
                 continue
 
             if verbose:
                 print(f"\n{factor}: raw={x} mode={cfg['mode']} → r={r:.3f}")
 
-            # hard-must-have check (r==0 kills everything)
+            # hard must-have
             if cfg["mode"]=="must_have" and r==0.0:
-                if verbose:
-                    print(f"{factor}: must-have FAILED → final score=0\n")
+                if verbose: print(f"{factor}: must-have FAILED → final score=0\n")
                 return 0.0
 
+            # compute normalized quality
             qn = self._qual_score(q)
             if verbose:
                 print(f"{factor}: quality={q} → qn={qn:.3f}")
 
-            fs = r * qn
-            contrib = w * fs
+            # —— blend raw & quality ⟵ FIXED here
+            fs = (1 - self.q_weight)*r + self.q_weight*qn
+            if verbose:
+                print(f"{factor}: blended score fs = "
+                      f"{(1-self.q_weight):.2f}*{r:.3f} + "
+                      f"{self.q_weight:.2f}*{qn:.3f} = {fs:.3f}")
 
-            total_w += w
+            contrib = w * fs
+            total_w     += w
             weighted_sum += contrib
 
             if verbose:
-                print(f"{factor}: fs={fs:.3f} * w={w} → contrib={contrib:.3f}")
-                print(f" Accum sum={weighted_sum:.3f}, total_w={total_w:.3f}")
+                print(f"{factor}: contrib = {w} * {fs:.3f} = {contrib:.3f}")
+                print(f" Accum sum = {weighted_sum:.3f}, total_w = {total_w:.3f}")
 
         if total_w == 0:
-            if verbose:
-                print("No weighted factors → score=0")
+            if verbose: print("No weighted factors → score=0")
             return 0.0
 
         final = weighted_sum / total_w
         if verbose:
             print(f"\nFinal score = {weighted_sum:.3f}/{total_w:.3f} = {final:.3f}\n")
         return final
+

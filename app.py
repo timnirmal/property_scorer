@@ -176,6 +176,16 @@ with tab1:
             value=0.1,
             help="Minimum normalized quality (0…1)"
         )
+        
+    col4, col5, col6 = st.columns(3)
+    with col4:
+        quality_weight = st.number_input(
+            "Quality weight",
+            min_value=0.0,
+            max_value=1.0,
+            value=0.8,
+            help="Weight for quality vs raw score blending (0…1)"
+        )
 
 with tab2:
     # Function to create property data inputs
@@ -274,7 +284,8 @@ with tab3:
             formatted_profile,
             must_have_tolerance=must_have_tolerance,
             margin_epsilon=margin_epsilon,
-            quality_floor=quality_floor
+            quality_floor=quality_floor,
+            quality_weight=quality_weight
         )
         
         # Run calculations
