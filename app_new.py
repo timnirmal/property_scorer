@@ -1,21 +1,21 @@
 import streamlit as st
 import os
 
-# Setup score folder structure if needed
-if not os.path.exists('score'):
-    os.makedirs('score')
-    
-# Copy scorer.py to score folder if not already there
-if not os.path.exists('score/scorer.py'):
-    with open('scorer.py', 'r') as f:
-        scorer_code = f.read()
-    with open('score/scorer.py', 'w') as f:
-        f.write(scorer_code)
+# # Setup score folder structure if needed
+# if not os.path.exists('score'):
+#     os.makedirs('score')
+#
+# # Copy scorer.py to score folder if not already there
+# if not os.path.exists('score/scorer.py'):
+#     with open('scorer.py', 'r') as f:
+#         scorer_code = f.read()
+#     with open('score/scorer.py', 'w') as f:
+#         f.write(scorer_code)
         
-# Create __init__.py if not already there
-if not os.path.exists('score/__init__.py'):
-    with open('score/__init__.py', 'w') as f:
-        f.write('from .scorer import PropertyScorer\n\n__all__ = [\'PropertyScorer\']')
+# # Create __init__.py if not already there
+# if not os.path.exists('score/__init__.py'):
+#     with open('score/__init__.py', 'w') as f:
+#         f.write('from .scorer import PropertyScorer\n\n__all__ = [\'PropertyScorer\']')
 
 # Import UI components
 from ui.components import (
