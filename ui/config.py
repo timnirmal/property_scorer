@@ -73,12 +73,12 @@ FACTORS = {
 
     # multi-POI factors (lists in JSON)
     "school_dist": {
-        "label":        "School Distance (mins)",
+        "label":        "School Walking Time (mins)",
         "default": {
-            "mode":      "nice_to_have",
-            "target":    1.0,
-            "lower":     0.5,
-            "upper":     1.5,
+            "mode":      "must_have",   # schools are critical
+            "target":    15.0,          # ideal: 15 min
+            "lower":     5.0,           # very close: 5 min
+            "upper":     30.0,          # still acceptable: 30 min
             "direction": -1,
             "weight":    4,
         },
@@ -89,12 +89,12 @@ FACTORS = {
         "aggregation":  "mean",
     },
     "hospital_dist": {
-        "label":        "Hospital Distance (mins)",
+        "label":        "Hospital Walking Time (mins)",
         "default": {
             "mode":      "nice_to_have",
-            "target":    2.0,
-            "lower":     1.0,
-            "upper":     3.0,
+            "target":    10.0,          # ideal: 10 min
+            "lower":     3.0,           # very close: 3 min
+            "upper":     20.0,          # still acceptable: 20 min
             "direction": -1,
             "weight":    4,
         },
@@ -105,12 +105,12 @@ FACTORS = {
         "aggregation":  "mean",
     },
     "supermarket_dist": {
-        "label":        "Supermarket Distance (mins)",
+        "label":        "Supermarket Walking Time (mins)",
         "default": {
             "mode":      "nice_to_have",
-            "target":    1.0,
-            "lower":     0.5,
-            "upper":     2.0,
+            "target":    10.0,          # ideal: 10 min
+            "lower":     5.0,           # very close: 5 min
+            "upper":     20.0,          # still acceptable: 20 min
             "direction": -1,
             "weight":    4,
         },
@@ -121,12 +121,12 @@ FACTORS = {
         "aggregation":  "mean",
     },
     "park_dist": {
-        "label":        "Park Distance (mins)",
+        "label":        "Park Walking Time (mins)",
         "default": {
             "mode":      "nice_to_have",
-            "target":    1.0,
-            "lower":     0.2,
-            "upper":     2.0,
+            "target":    10.0,          # ideal: 10 min
+            "lower":     5.0,           # very close: 5 min
+            "upper":     20.0,          # still acceptable: 20 min
             "direction": -1,
             "weight":    4,
         },

@@ -70,18 +70,18 @@ def create_property_inputs(factor_key: str, defaults: dict) -> dict:
 def create_profile_config(active_properties: dict):
     """
     Build the profile configuration:
-      1) For each nearby amenity, ask yes/no → then min/max + direction + weight or mark irrelevant.
+      1) For each nearby amenity, ask yes/no → then min/max time + direction + weight or mark irrelevant.
       2) For all other active_properties (walk_dist, walk_time, etc.), show full inputs.
       3) Collect global PropertyScorer parameters.
     """
     st.header("Profile Configuration")
     profile = {}
 
-    # 1) Amenity toggles
-    st.subheader("Nearby Amenities (yes → set range; no → ignore)")
+    # 1) Amenity toggles (now using walking time)
+    st.subheader("Nearby Amenities (yes → set time range; no → ignore)")
     amenity_keys = ["train_dist", "hospital_dist", "supermarket_dist", "park_dist", "school_dist"]
     for key in amenity_keys:
-        base_label = FACTORS[key]["label"].split("(")[0].strip()  # e.g. "Train Distance"
+        base_label = FACTORS[key]["label"].split("(")[0].strip()
         want = st.radio(
             f"Do you need {base_label}?",
             ("yes", "no"),
@@ -90,21 +90,19 @@ def create_profile_config(active_properties: dict):
         defaults = FACTORS[key]["default"]
 
         if want == "yes":
-            # min/max inputs
             cols1 = st.columns(2)
             with cols1[0]:
-                min_d = st.number_input(
-                    "Min distance (km)",
+                min_t = st.number_input(
+                    "Min walking time (mins)",
                     value=float(defaults["lower"]),
                     key=f"{key}_lower"
                 )
             with cols1[1]:
-                max_d = st.number_input(
-                    "Max distance (km)",
+                max_t = st.number_input(
+                    "Max walking time (mins)",
                     value=float(defaults["upper"]),
                     key=f"{key}_upper"
                 )
-            # direction + weight
             cols2 = st.columns(2)
             with cols2[0]:
                 direction = st.selectbox(
@@ -123,9 +121,9 @@ def create_profile_config(active_properties: dict):
                 )
             profile[key] = {
                 "mode":      "nice_to_have",
-                "target":    min_d,
-                "lower":     min_d,
-                "upper":     max_d,
+                "target":    min_t,
+                "lower":     min_t,
+                "upper":     max_t,
                 "direction": direction,
                 "weight":    weight,
             }
