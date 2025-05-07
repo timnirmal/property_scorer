@@ -58,7 +58,7 @@ FACTORS = {
 
     # nearest-train (still single)
     "train_dist": {
-        "label":      "Train Distance (km)",
+        "label":      "Train Distance (mins)",
         "default": {
             "mode":      "nice_to_have",
             "target":    1.0,
@@ -67,13 +67,13 @@ FACTORS = {
             "direction": -1,
             "weight":    4,
         },
-        "csv_column": "train_walking_distance",
-        "qual_method":"lower_is_better",
+        "csv_column":  "train_walking_time",
+        "qual_method": "lower_is_better",
     },
 
     # multi-POI factors (lists in JSON)
     "school_dist": {
-        "label":      "School Distance (km)",
+        "label":        "School Distance (mins)",
         "default": {
             "mode":      "nice_to_have",
             "target":    1.0,
@@ -82,12 +82,14 @@ FACTORS = {
             "direction": -1,
             "weight":    4,
         },
-        "csv_column": "additional_schools",   # JSON list
-        "qual_method":"lower_is_better",
-        "multi":     True,
+        "csv_column":   "additional_schools",
+        "qual_method":  "lower_is_better",
+        "multi":        True,
+        "multi_path":   "walking.travel_time",
+        "aggregation":  "mean",
     },
     "hospital_dist": {
-        "label":      "Hospital Distance (km)",
+        "label":        "Hospital Distance (mins)",
         "default": {
             "mode":      "nice_to_have",
             "target":    2.0,
@@ -96,12 +98,14 @@ FACTORS = {
             "direction": -1,
             "weight":    4,
         },
-        "csv_column": "additional_hospitals",
-        "qual_method":"lower_is_better",
-        "multi":     True,
+        "csv_column":   "additional_hospitals",
+        "qual_method":  "lower_is_better",
+        "multi":        True,
+        "multi_path":   "walking.travel_time",
+        "aggregation":  "mean",
     },
     "supermarket_dist": {
-        "label":      "Supermarket Distance (km)",
+        "label":        "Supermarket Distance (mins)",
         "default": {
             "mode":      "nice_to_have",
             "target":    1.0,
@@ -110,12 +114,14 @@ FACTORS = {
             "direction": -1,
             "weight":    4,
         },
-        "csv_column": "additional_supermarkets",
-        "qual_method":"lower_is_better",
-        "multi":     True,
+        "csv_column":   "additional_supermarkets",
+        "qual_method":  "lower_is_better",
+        "multi":        True,
+        "multi_path":   "walking.travel_time",
+        "aggregation":  "mean",
     },
     "park_dist": {
-        "label":      "Park Distance (km)",
+        "label":        "Park Distance (mins)",
         "default": {
             "mode":      "nice_to_have",
             "target":    1.0,
@@ -124,8 +130,31 @@ FACTORS = {
             "direction": -1,
             "weight":    4,
         },
-        "csv_column": "additional_parks",
-        "qual_method":"lower_is_better",
-        "multi":     True,
+        "csv_column":   "additional_parks",
+        "qual_method":  "lower_is_better",
+        "multi":        True,
+        "multi_path":   "walking.travel_time",
+        "aggregation":  "mean",
     },
+}
+
+# -----------------------------------------------------------------------------
+# OPTIONAL DEFAULTS for any fields you omit above (so you can tweak in one spot)
+# -----------------------------------------------------------------------------
+OPTIONAL_DEFAULTS = {
+    # multi-POI extraction path
+    "multi_path":     "walking.travel_time",
+
+    # aggregation defaults
+    "aggregation":    "mean",
+    "nearest_k":      1,
+    "farthest_k":     1,
+    "percentile":     0.5,
+
+    # weighted-decay defaults
+    "decay_function": None,    # or "exp", "quadratic"
+    "decay_rate":     1.0,
+
+    # quality method fallback
+    "qual_method":    "lower_is_better",
 }

@@ -1,0 +1,8 @@
+streamlit
+pandas
+requests
+tqdm
+numpy
+protobuf
+pillow
+matplotlib

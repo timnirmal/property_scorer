@@ -80,7 +80,7 @@ def run_calculation(profile, properties_data, qualities_data, scorer_params, act
         for key, x2 in raw2.items():
             cfg = profile[key]
             label = FACTORS[key]["label"]
-            r = scorer._raw_score(x2, cfg)
+            r = scorer._raw(x2, cfg)
             if r is None:
                 continue
             if cfg["mode"] == "must_have" and r == 0.0:
@@ -94,7 +94,7 @@ def run_calculation(profile, properties_data, qualities_data, scorer_params, act
                 fs = r
                 lines.append(f"  • raw-only: r={r:.3f} → fs={fs:.3f} (w={cfg['weight']})")
             else:
-                qn = scorer._qual_score(q)
+                qn = scorer._qual(q)
                 fs = (1-scorer.q_weight)*r + scorer.q_weight*qn
                 lines.append(
                     f"  • blended: r={r:.3f}, qn={qn:.3f}, "
